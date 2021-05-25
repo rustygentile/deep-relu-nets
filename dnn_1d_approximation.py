@@ -67,20 +67,17 @@ class Net(nn.Module):
 
 net = Net(width=20, depth=5)
 
-n = 50
+n = 1000
 x = torch.linspace(-1, 1, n).reshape([-1,1])
-y = x**2
-y = torch.sin(np.pi*10*x)
 y = torch.rand(x.shape)
-
 x_fine = torch.linspace(-1, 1, n * 10).reshape([-1,1])
 
 optimizer = torch.optim.SGD(net.parameters(), lr=0.05)
-# optimizer = GD(net.parameters(), lr=0.05)
 
-n_train_steps = 70000
+n_train_steps = 10001
 print_interval = n_train_steps // 10
 losses = np.empty(n_train_steps)
+p_trn = {}
 
 for step in range(n_train_steps):
 
@@ -92,11 +89,7 @@ for step in range(n_train_steps):
     losses[step] = loss
     if print_interval > 0 and step % print_interval == 0:
         print(f'step: {step}, error: {loss}')
-        fig, ax = plt.subplots()
-        ax.plot(x.detach().numpy(), y.detach().numpy(), label='CPwL')
-        ax.plot(x_fine.detach().numpy(), net(x_fine).detach().numpy(), '--', label=f'ReLU {step}')
-        ax.legend()
-
+        p_trn[str(step)] = net(x_fine).detach().numpy()
 
 
 print(f'\nseed {seed}, manual {manual}')
@@ -104,33 +97,32 @@ print(f'\nseed {seed}, manual {manual}')
 
 if __name__ == '__main__':
 
-    fig, ax = plt.subplots(1, 3)
+    fig, ax = plt.subplots(1, 2)
     ax[0].set_yscale('log')
-    ax[0].plot(losses)
+    ax[0].plot(losses, label='Losses')
+    plt0, = ax[0].plot(step, losses[-1], '.', label=str(step))
+    ax[0].legend()
 
     ax[1].plot(x.detach().numpy(), y.detach().numpy(), label='CPwL')
-    ax[1].plot(x_fine.detach().numpy(), net(x_fine).detach().numpy(), '--', label='ReLU')
+    plt1, = ax[1].plot(x_fine.detach().numpy(), p_trn[str(step)], '--', label='ReLU')
     ax[1].legend()
 	
-    y = []
-    depth = len(net.layers)
-    for i in range(depth):
-        y.append(net.part(x, i))
-    width = y[0].shape[-1]
-
     slider_ax = plt.axes([0, 0, 1, 0.05])
-    slider = plt.Slider(slider_ax, 'layer', 0, depth)
-
-    plots = []
-    for j in range(width):
-        plots.append(ax[2].plot(x.detach().numpy(), y[i].detach().numpy()[:,j])[0])
+    slider = plt.Slider(
+        ax=slider_ax,
+        label='Training Step',
+        valmin=0,
+        valmax=10,
+        valinit=10
+        )
 
     def update(val):
-        i = np.abs(np.arange(depth) - val).argmin()
-        for j in range(width):
-            plots[j].set_ydata(y[i].detach().numpy()[:,j])
-    update(0)
+        step = int(val) * print_interval
+        plt0.set_xdata(step)
+        plt0.set_ydata(losses[step])
+        plt0.set_label(str(step))
+        plt1.set_ydata(p_trn[str(step)])
 
+    update(10)
     slider.on_changed(update)
-
     plt.show()
