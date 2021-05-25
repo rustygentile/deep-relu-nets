@@ -1,5 +1,3 @@
-import itertools
-
 import numpy as np
 
 import torch
@@ -7,27 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
-class GD:
-
-    def __init__(self, params, lr):
-
-        self.params = list(params)
-        self.lr = lr
-
-    def step(self):
-
-        for p in self.params:
-            p.data.sub_(self.lr * p.grad.data)
-
-    def zero_grad(self):
-
-        for p in self.params:
-            if p.grad is not None:
-                p.grad.detach_()
-                p.grad.zero_()
-
-seed = None
 seed = 3262104886130042880
 
 if seed == None:
@@ -65,12 +44,12 @@ class Net(nn.Module):
         return x
 
 
-net = Net(width=20, depth=5)
+net = Net(width=35, depth=5)
 
-n = 1000
-x = torch.linspace(-1, 1, n).reshape([-1,1])
+n_pts = 40
+x = torch.linspace(-1, 1, n_pts).reshape([-1,1])
 y = torch.rand(x.shape)
-x_fine = torch.linspace(-1, 1, n * 10).reshape([-1,1])
+x_fine = torch.linspace(-1, 1, n_pts * 10).reshape([-1,1])
 
 optimizer = torch.optim.SGD(net.parameters(), lr=0.05)
 
@@ -97,32 +76,28 @@ print(f'\nseed {seed}, manual {manual}')
 
 if __name__ == '__main__':
 
-    fig, ax = plt.subplots(1, 2)
+    fig, ax = plt.subplots(1, 2, figsize=(7, 4))
     ax[0].set_yscale('log')
     ax[0].plot(losses, label='Losses')
-    plt0, = ax[0].plot(step, losses[-1], '.', label=str(step))
-    ax[0].legend()
+    plt0, = ax[0].plot(step, losses[-1], '.', markersize=10, label=f'Current Step')
+    ax[0].legend(loc='upper right')
 
     ax[1].plot(x.detach().numpy(), y.detach().numpy(), label='CPwL')
     plt1, = ax[1].plot(x_fine.detach().numpy(), p_trn[str(step)], '--', label='ReLU')
-    ax[1].legend()
+    ax[1].legend(loc='upper right')
 	
-    slider_ax = plt.axes([0, 0, 1, 0.05])
-    slider = plt.Slider(
-        ax=slider_ax,
-        label='Training Step',
-        valmin=0,
-        valmax=10,
-        valinit=10
-        )
-
-    def update(val):
+    def animate(val):
         step = int(val) * print_interval
         plt0.set_xdata(step)
         plt0.set_ydata(losses[step])
-        plt0.set_label(str(step))
+        plt0.set_label(f'Step:\n{step}')
         plt1.set_ydata(p_trn[str(step)])
+        return plt0, plt1
 
-    update(10)
-    slider.on_changed(update)
+    ani = animation.FuncAnimation(
+                fig,
+                animate,
+                frames=range(11))
+
+    #ani.save('asdf.gif')
     plt.show()
