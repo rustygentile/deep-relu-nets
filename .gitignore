@@ -1,2 +1,4 @@
 .idea
 __pycache__/
+*.gif
+!images/pts_10_width_20_depth_1.gif

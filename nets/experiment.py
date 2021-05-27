@@ -28,7 +28,8 @@ class TrainingExperiment:
                  n_pts=10,
                  n_intervals=10,
                  interval_steps=1000,
-                 seed=None):
+                 seed=None,
+                 data=None):
         """
         Parameters
         ----------
@@ -46,6 +47,9 @@ class TrainingExperiment:
             Training steps per interval
         seed: int, optional
             Seed for randomization
+        data: dict, optional
+            Training data. Must have keys 'x' and 'y'. If not provided,
+            random data will be generated.
         """
 
         # Initial values
@@ -56,8 +60,12 @@ class TrainingExperiment:
         self.uid = str(uuid.uuid4().hex)
 
         # Training data
-        self.x = torch.linspace(-1, 1, n_pts).reshape([-1, 1])
-        self.y = torch.rand(self.x.shape)
+        if data is None:
+            self.x = torch.linspace(-1, 1, n_pts).reshape([-1, 1])
+            self.y = torch.rand(self.x.shape)
+        else:
+            self.x = torch.from_numpy(data['x']).float().reshape([-1, 1])
+            self.y = torch.from_numpy(data['y']).float().reshape([-1, 1])
 
         # Used for plotting and reporting results
         self.x_fine = torch.linspace(-1, 1, n_pts * 10).reshape([-1, 1])
@@ -68,6 +76,9 @@ class TrainingExperiment:
         logger.info(f'Creating ReLU net with id: {self.uid} width: {width} depth: {depth}')
         self.net = ReLUNet(width=width, depth=depth)
         self.optimizer = torch.optim.SGD(self.net.parameters(), lr=alpha)
+
+        logger.info(f'Theoretical number of parameters: {self.count_manually()}')
+        logger.info(f'Actual trainable parameters: {self.count_parameters()}')
 
         if seed is None:
             self.seed = torch.initial_seed()
@@ -93,7 +104,7 @@ class TrainingExperiment:
                 logger.info(f'step: {step}, error: {loss}')
                 self.p_trn[str(step)] = self.net(self.x_fine).detach().numpy()
 
-    def plot(self, file_name=None, display=True):
+    def plot(self, file_name=None, display=True, title=None):
         """
         Plots an animation of the training process.
         """
@@ -102,7 +113,7 @@ class TrainingExperiment:
 
         # Log plot of losses
         ax[0].set_yscale('log')
-        ax[0].plot(self.losses, label='Losses')
+        ax[0].plot(self.losses, label='Loss')
         plt0, = ax[0].plot(step, self.losses[-1], '.', markersize=10,
                            label=f'Current Step')
         ax[0].legend(loc='upper right')
@@ -127,8 +138,29 @@ class TrainingExperiment:
             animate,
             frames=list(range(self.n_intervals + 1)) + [self.n_intervals] * 5)
 
+        if title is not None:
+            plt.suptitle(title)
+
         if file_name is not None:
             ani.save(file_name)
 
         if display:
             plt.show()
+
+    def count_parameters(self):
+        """
+        Return
+        ------
+        Exact number of trainable parameters counted by Pytorch
+        """
+        return sum(p.numel() for p in self.net.parameters() if p.requires_grad)
+
+    def count_manually(self):
+        """
+        Return
+        ------
+        Theoretical number of parameters using equation (5)
+        """
+        L = self.net.depth
+        W = self.net.width
+        return W * (W + 1) * L - (W - 1) ** 2 + 2

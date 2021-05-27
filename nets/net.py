@@ -9,6 +9,8 @@ class ReLUNet(nn.Module):
     def __init__(self, width, depth):
 
         super().__init__()
+        self.width = width
+        self.depth = depth
 
         self.layer_first = nn.Linear(1, width)
         self.layers = nn.ModuleList(
