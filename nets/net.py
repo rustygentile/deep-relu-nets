@@ -14,7 +14,7 @@ class ReLUNet(nn.Module):
 
         self.layer_first = nn.Linear(1, width)
         self.layers = nn.ModuleList(
-            [nn.Linear(width, width) for _ in range(depth)]
+            [nn.Linear(width, width) for _ in range(depth - 1)]
         )
         self.layer_last = nn.Linear(width, 1)
 

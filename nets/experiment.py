@@ -1,3 +1,4 @@
+import random
 import torch
 import torch.nn as nn
 import numpy as np
@@ -59,16 +60,24 @@ class TrainingExperiment:
         self.losses = np.empty(self.n_train_steps)
         self.uid = str(uuid.uuid4().hex)
 
+        if seed is None:
+            self.seed = torch.initial_seed()
+            self.manual = False
+        else:
+            random.seed(0)
+            torch.manual_seed(seed)
+            self.manual = True
+
         # Training data
         if data is None:
-            self.x = torch.linspace(-1, 1, n_pts).reshape([-1, 1])
+            self.x = torch.linspace(0, 1, n_pts).reshape([-1, 1])
             self.y = torch.rand(self.x.shape)
         else:
             self.x = torch.from_numpy(data['x']).float().reshape([-1, 1])
             self.y = torch.from_numpy(data['y']).float().reshape([-1, 1])
 
         # Used for plotting and reporting results
-        self.x_fine = torch.linspace(-1, 1, n_pts * 10).reshape([-1, 1])
+        self.x_fine = torch.linspace(0, 1, n_pts * 10).reshape([-1, 1])
 
         # Partially trained NN results
         self.p_trn = {}
@@ -79,13 +88,6 @@ class TrainingExperiment:
 
         logger.info(f'Theoretical number of parameters: {self.count_manually()}')
         logger.info(f'Actual trainable parameters: {self.count_parameters()}')
-
-        if seed is None:
-            self.seed = torch.initial_seed()
-            self.manual = False
-        else:
-            torch.manual_seed(seed)
-            self.manual = True
 
     def run(self):
         """
