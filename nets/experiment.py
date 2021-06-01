@@ -71,13 +71,12 @@ class TrainingExperiment:
         # Training data
         if data is None:
             self.x = torch.linspace(0, 1, n_pts).reshape([-1, 1])
+            self.x_fine = torch.linspace(0, 1, n_pts * 10).reshape([-1, 1])
             self.y = torch.rand(self.x.shape)
         else:
             self.x = torch.from_numpy(data['x']).float().reshape([-1, 1])
+            self.x_fine = torch.from_numpy(data['x']).float().reshape([-1, 1])
             self.y = torch.from_numpy(data['y']).float().reshape([-1, 1])
-
-        # Used for plotting and reporting results
-        self.x_fine = torch.linspace(0, 1, n_pts * 10).reshape([-1, 1])
 
         # Partially trained NN results
         self.p_trn = {}
@@ -106,7 +105,7 @@ class TrainingExperiment:
                 logger.info(f'step: {step}, error: {loss}')
                 self.p_trn[str(step)] = self.net(self.x_fine).detach().numpy()
 
-    def plot(self, file_name=None, display=True, title=None):
+    def plot(self, file_name=None, display=True, title=None, func_name='CPwL'):
         """
         Plots an animation of the training process.
         """
@@ -122,9 +121,9 @@ class TrainingExperiment:
 
         # Plot the exact function and the ReLU
         ax[1].plot(self.x.detach().numpy(), self.y.detach().numpy(),
-                   label='CPwL')
+                   label=func_name)
         plt1, = ax[1].plot(self.x_fine.detach().numpy(),
-                           self.p_trn[str(step)], '--', label='ReLU')
+                           self.p_trn[str(step)], '--', label='ReLU NN')
         ax[1].legend(loc='upper right')
 
         def animate(val):
