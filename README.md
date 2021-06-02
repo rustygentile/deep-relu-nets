@@ -37,11 +37,11 @@ For instance, here we see that not enough breakpoints form in order to produce a
 
 Using deep networks allows us to approximate more interesting functions. In this case though, the training is still unstable. At depth four, the training fails altogether and the ReLU network eventually outputs a constant zero. The function being approximated in these examples is a Fourier series with five terms and randomized coefficients.
 
-![](./images/Fourier_terms_5_width_20_depth_2.gif)
+![](./images/fourier_terms_5_width_20_depth_2.gif)
 
-![](./images/Fourier_terms_5_width_20_depth_3.gif)
+![](./images/fourier_terms_5_width_20_depth_3.gif)
 
-![](./images/Fourier_terms_5_width_20_depth_4.gif)
+![](./images/fourier_terms_5_width_20_depth_4.gif)
 
 ### Analysis
 
