@@ -17,26 +17,28 @@ class SingleLayerTest(unittest.TestCase):
             level=logging.INFO,
             datefmt='%Y-%m-%d %H:%M:%S')
 
-        n_knots = 10
+        n_knots = 50
         np.random.seed(seed=123456)
         knot_xs = np.linspace(-1, 1, n_knots)
         knot_ys = np.random.rand(n_knots)
-        x, y = piecewise_linear(knot_xs, knot_ys, n_knots * 100)
+        x, y = piecewise_linear(knot_xs, knot_ys, 10)
         self.data = {
             'x': x,
             'y': y
         }
 
-    def test_widths_CPwL_10(self):
+    def test_example(self):
 
-        for w in range(10, 21):
-            my_exp = TrainingExperiment(width=w, depth=1, data=self.data,
-                                        n_intervals=100, seed=67890)
-            my_exp.run()
-            my_exp.plot(display=False,
-                        file_name=f'./images/CPwL_pts_{10}_width_{w}_depth_{1}.gif',
-                        title=f'Points: {10}, Width: {w}, Depth: {1}',
-                        func_name='CPwL')
+        w = 50
+        d = 2
+
+        my_exp = TrainingExperiment(width=w, depth=d, data=self.data,
+                                    n_intervals=100, seed=67890)
+        my_exp.run()
+        my_exp.plot(display=False,
+                    file_name=f'./example.gif',
+                    title=f'Points: {50}, Width: {w}, Depth: {d}',
+                    func_name='CPwL')
 
 
 if __name__ == '__main__':

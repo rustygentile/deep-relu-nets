@@ -1,6 +1,6 @@
 # Deep ReLU Nets
 
-Some experiments with deep [ReLU](https://en.wikipedia.org/wiki/Rectifier_(neural_networks)) neural networks.
+Some experiments using deep [ReLU](https://en.wikipedia.org/wiki/Rectifier_(neural_networks)) neural networks to approximate one dimensional functions.
 
 ## Installation
 
@@ -10,7 +10,7 @@ You should have a Python 3 environment and the following packages:
 
 The experiments are structured as unit tests. To run all tests use:
 ```
-python -m unittest test discover
+python -m unittest discover test "*.py"
 ```
 
 Running all tests will most likely take several hours. To run just one: 
