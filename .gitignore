@@ -1,4 +1,9 @@
 .idea
 __pycache__/
 *.gif
-!images/pts_10_width_20_depth_1.gif
+!images/CPwL_pts_10_width_10_depth_1.gif
+!images/CPwL_pts_10_width_13_depth_1.gif
+!/images/CPwL_pts_10_width_20_depth_1.gif
+!/images/Fourier_terms_5_width_20_depth_2.gif
+!/images/Fourier_terms_5_width_20_depth_3.gif
+!/images/Fourier_terms_5_width_20_depth_4.gif
